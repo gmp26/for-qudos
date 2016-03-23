@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ReplState" timestamp="1458755138825">{:repl-history {:ide [], :local [&quot;root-element&quot; &quot;(el \&quot;app\&quot;)&quot; &quot;(el \&quot;app\&quot;\n    )&quot; &quot;root&quot; &quot;(range 0.05 1.05 0.05)&quot; &quot;(range 20)&quot; &quot;(range 1 21)&quot; &quot;(map #(* 0.05 %) (range 1 21))&quot; &quot;ub-risks&quot;], :remote []}}</component>
+</project>
