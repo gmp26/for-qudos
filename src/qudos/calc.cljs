@@ -27,52 +27,32 @@
   [risk] (* 100 (- 1 risk)))
 
 (defn sampled "take n full precision numeric samples"
-  [n]
-  (->> centiles
-       (#(sample % :replace true :seed 0))
-       (map uniform-sample-on)
-       (map to-survival-%)
-       (take n)))
+  [n] (->> centiles
+           (#(sample % :replace true :seed 0))
+           (map uniform-sample-on)
+           (map to-survival-%)
+           (take n)))
 
-(defn random-choice
-  [coll]
-  (first (take 1 (sample coll :replace true))))
+(defn random-choice "choose one item randomly from a collection"
+  ;;todo: make this use rng instead of sample.
+  [coll] (first (take 1 (sample coll :replace true))))
 
-(defn risk-category
-  [rate]
-  (cond
-    (< rate 90) {:risk :high
-                 :icon (random-choice [:baby :incubator :toddler-bed])}
-    (<= rate 99) {:risk :normal
-                  :icon (random-choice [:baby :toddler :yboy :ygirl])}
-    (> rate 99) {:risk :low
-                 :icon (random-choice [:toddler :yboy :oboy :ygirl :ogirl])})
-  )
+(defn risk-category "annotate a risk value with category and icon"
+  [rate] (cond
+           (< rate 90) {:risk :high
+                        :icon (random-choice [:baby :incubator :toddler-bed])}
+           (<= rate 99) {:risk :normal
+                         :icon (random-choice [:baby :toddler :yboy :ygirl])}
+           (> rate 99) {:risk :low
+                        :icon (random-choice [:toddler :yboy :oboy :ygirl :ogirl])}))
 
-(defn decorated
-  [n]
-  (->> (sampled n)
-       (map #(let [{:keys [risk icon]} (risk-category %)]
-              {:rate      %
-               :formatted (.toFixed (js/Number. %) 0)
-               :icon      icon
-               :risk      risk}
-              ))))
-
-(defn formatted
-  [n]
-  (map #(.toFixed (js/Number. %) 0) (sampled n)))
-
-;(defn blocked-samples [m n] (into [] (take m (repeatedly #(into [] (sampled n))))))
-(defn blocked-samples [m n] (repeatedly m #(formatted n)))
-
-
-
-#_(defn format [x]
-    "testing common lisp formatting"
-    (pp/cl-format nil "~1,8T~F~1,8T~F~1,8T~F"
-                  (* 10 x) x (* 100 x)))
-
+(defn decorated "decorate n samples with string representation, icon, and risk band"
+  [n] (->> (sampled n)
+           (map #(let [{:keys [risk icon]} (risk-category %)]
+                  {:rate      %
+                   :formatted (.toFixed (js/Number. %) 0)
+                   :icon      icon
+                   :risk      risk}))))
 
 ;; (defn a-possible-future [n]
 ;;  (apply str (take n (repeatedly #(if (< (rand) (sim-risk)) "   " ":) ")))))
