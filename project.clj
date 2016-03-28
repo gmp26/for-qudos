@@ -15,6 +15,7 @@
                  ;;[cljsjs/react "0.14.3-0"]
                  ;;[cljsjs/react-dom "0.14.3-1"]
                  ;;[cljsjs/react-dom-server "0.14.3-0"]
+                 [cljx-sampling "0.1.0"]
                  [rum "0.6.0"]
                  [figwheel-sidecar "0.5.0"]
                  ]

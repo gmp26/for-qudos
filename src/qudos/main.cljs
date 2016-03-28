@@ -1,6 +1,8 @@
 (ns ^:figwheel-always qudos.main
   (:require [rum.core :as rum]
-            [qudos.calc :as calc]))
+            [qudos.calc :as calc]
+            [clojure.string :as s]
+            ))
 
 (enable-console-print!)
 
@@ -10,8 +12,17 @@
 
 
 (rum/defc
+  icon-block []
+  [:div
+   (for [p (partition 20 (calc/sampled 100))]
+     [:p (s/join " " p)])]
+  )
+
+(rum/defc
   root []
-  [:h1 "Root element"])
+  [:div
+   [:h1 "Root element"]
+   (icon-block)])
 
 (defn el [id] (js/document.getElementById id))
 
@@ -23,3 +34,4 @@
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
 )
+

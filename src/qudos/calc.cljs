@@ -1,105 +1,79 @@
 (ns ^:figwheel-always qudos.calc
-  (:require [rum.core :as rum]))
+  (:require [rum.core :as rum]
+            [clojure.string :as s]
+            [cljs.pprint :as pp]
+            [cljx-sampling.random :as random]
+            [cljx-sampling.core :refer [sample]]))
 
-(def num-pats 100)
+(enable-console-print!)
+;; See https://github.com/ashenfad/cljx-sampling
 
-(def centiles (range 1 21))
-(def percentiles (map #(* 0.05 %) centiles))
+(def rng (random/create 42))
+
+(defn rand01 [] (random/next-double! rng 1))
+
+(def ub-risks [0.0005456 0.0009988 0.0015798 0.0023618 0.0033583
+               0.0044388 0.0056236 0.0068915 0.0084389 0.0102027
+               0.0123412 0.0151487 0.0184223 0.0226536 0.0278246
+               0.0348422 0.0463867 0.0640427 0.1017762 0.6340773])
+
+(def centiles (partition 2 1 (cons 0 ub-risks)))
+;; ((0 0.0005456) (0.0005456 0.0009988) ... )
+
+(defn uniform-sample-on "uniform sample on the interval [lb, ub]"
+  [[lb ub]] (+ lb (* (rand01) (- ub lb))))
+
+(defn to-survival-% "convert p(death) to % chance of survival "
+  [risk] (* 100 (- 1 risk)))
+
+(defn sampled "take n full precision numeric samples"
+  [n]
+  (->> centiles
+       (#(sample % :replace true :seed 0))
+       (map uniform-sample-on)
+       (map to-survival-%)
+       (take n)))
+
+(defn random-choice
+  [coll]
+  (first (take 1 (sample coll :replace true))))
+
+(defn risk-category
+  [rate]
+  (cond
+    (< rate 90) {:risk :high
+                 :icon (random-choice [:baby :incubator :toddler-bed])}
+    (<= rate 99) {:risk :normal
+                  :icon (random-choice [:baby :toddler :yboy :ygirl])}
+    (> rate 99) {:risk :low
+                 :icon (random-choice [:toddler :yboy :oboy :ygirl :ogirl])})
+  )
+
+(defn decorated
+  [n]
+  (->> (sampled n)
+       (map #(let [{:keys [risk icon]} (risk-category %)]
+              {:rate      %
+               :formatted (.toFixed (js/Number. %) 0)
+               :icon      icon
+               :risk      risk}
+              ))))
+
+(defn formatted
+  [n]
+  (map #(.toFixed (js/Number. %) 0) (sampled n)))
+
+;(defn blocked-samples [m n] (into [] (take m (repeatedly #(into [] (sampled n))))))
+(defn blocked-samples [m n] (repeatedly m #(formatted n)))
 
 
-(comment ;;unused
-         (defn intervals-on [monotonic]
-           (mapv (fn [& args] (vec args)) (cons 0 monotonic) monotonic))
 
-         (def centile-boundaries (intervals-on percentiles))
-         (def centile-risks (intervals-on ub-risks)))
+#_(defn format [x]
+    "testing common lisp formatting"
+    (pp/cl-format nil "~1,8T~F~1,8T~F~1,8T~F"
+                  (* 10 x) x (* 100 x)))
 
-(def ub-risks [0.0005456
-               0.0009988
-               0.0015798
-               0.0023618
-               0.0033583
-               0.0044388
-               0.0056236
-               0.0068915
-               0.0084389
-               0.0102027
-               0.0123412
-               0.0151487
-               0.0184223
-               0.0226536
-               0.0278246
-               0.0348422
-               0.0463867
-               0.0640427
-               0.1017762
-               0.6340773])
 
-(defn random-centile [risks]
-  (let [index (rand-nth (range 0 20))
-        z-risks (vec (cons 0 risks))]
-    [(z-risks index) (z-risks (inc index))]))
+;; (defn a-possible-future [n]
+;;  (apply str (take n (repeatedly #(if (< (rand) (sim-risk)) "   " ":) ")))))
 
-(defn uniform-sample-on [[lower-bound upper-bound]]
-  (+ lower-bound (* (rand) (- upper-bound lower-bound))))
-
-(defn sim-risk [] (uniform-sample-on (random-centile ub-risks)))
-
-(defn to-survival-% [risk] (* 100 (- 1 risk)))
-
-(defn sample-% [n] (take 100 (repeatedly (comp to-survival-% sim-risk))))
-
-(defn formatted-% [n] (map #(.toFixed (js/Number. %) 0) (sample-% n)))
-
-;Sub GenRiskDist()
-  ;
-  ;Dim NumPats As Integer 'number of patient risks to simulate
-  ;Dim ThisRandNum As Double
-  ;Dim LBRisk As Double
-  ;Dim UBRisk As Double
-  ;Dim SimRisk As Double
-  ;Dim CentileRisks(1 To 20, 1 To 2)
-  ;Dim CentileBoundaries(1 To 20, 1 To 2)
-  ;
-  ;Application.ScreenUpdating = False
-  ;
-  ;'read in centile ranges
-  ;CentileRisks(1, 1) = 0
-  ;CentileRisks(1, 2) = Sheets("Setup").Range("C3").Value
-  ;CentileBoundaries(1, 1) = 0
-  ;CentileBoundaries(1, 2) = Sheets("Setup").Range("B3").Value
-  ;
-  ;For j = 2 To 20
-  ;CentileRisks(j, 1) = Sheets("Setup").Range("C2").Offset(j - 1, 0).Value
-  ;CentileRisks(j, 2) = Sheets("Setup").Range("C2").Offset(j, 0).Value
-  ;CentileBoundaries(j, 1) = Sheets("Setup").Range("B2").Offset(j - 1, 0).Value
-  ;CentileBoundaries(j, 2) = Sheets("Setup").Range("B2").Offset(j, 0).Value
-  ;Next j
-  ;
-  ;NumPats = Sheets("Setup").Range("F4").Value 'read from sheet
-  ;
-  ;Randomize 'reset seed for random number generator
-  ;
-  ;'start simulation
-  ;For j = 1 To NumPats
-  ;ThisRandNum = Rnd()
-  ;For k = 1 To 20 'check which centile
-  ;If ThisRandNum > CentileBoundaries(k, 1) And ThisRandNum <= CentileBoundaries(k, 2) Then
-  ;LBRisk = CentileRisks(k, 1)
-  ;UBRisk = CentileRisks(k, 2)
-  ;Exit For
-  ;End If
-  ;Next k
-  ;
-  ;'generate risk within this boundary
-  ;ThisRandNum = Rnd()
-  ;SimRisk = (UBRisk - LBRisk) * ThisRandNum + LBRisk
-  ;
-  ;'write out
-  ;Sheets("SimulDist").Range("A1").Offset(j, 0).Value = j
-  ;Sheets("SimulDist").Range("B1").Offset(j, 0).Value = SimRisk
-  ;Next j
-  ;
-  ;Sheets("SimulDist").Activate
-  ;
-  ;End Sub
