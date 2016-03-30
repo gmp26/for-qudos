@@ -14,12 +14,12 @@
 (def background
   {:low "#F8F8E8"
    :normal "#E0E8E8"
-   :high "#DECFCC"})
+   :high "#D0CBCC"})
 
 (rum/defc
   icon-block []
   [:div {:style {:padding "30px"}}
-   (for [row (partition 10 (calc/decorated 100))]
+   (for [row (partition 20 (calc/decorated 100))]
      [:div {:style {:zoom    0.2}}
       (for [item row]
         [:div {:style {:display          "inline-table"
