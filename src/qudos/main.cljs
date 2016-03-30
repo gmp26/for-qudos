@@ -11,11 +11,25 @@
 (defonce app-state (atom {:text "Hello world!"}))
 
 
+(def background
+  {:low "#F8F8E8"
+   :normal "#E0E8E8"
+   :high "#DECFCC"})
+
 (rum/defc
   icon-block []
-  [:div
-   (for [p (partition 20 (calc/sampled 100))]
-     [:p (s/join " " p)])]
+  [:div {:style {:padding "30px"}}
+   (for [row (partition 10 (calc/decorated 100))]
+     [:div {:style {:zoom    0.2}}
+      (for [item row]
+        [:div {:style {:display          "inline-table"
+                       :margin           "5px"
+                       :padding          "35px 60px 40px 5px"
+                       :border-radius    "30px"
+                       :background-color ((:risk item) background)
+                       }}
+         [:img {:src (str "assets/" (name (:icon item)) ".png")}]])
+      ])]
   )
 
 (rum/defc
