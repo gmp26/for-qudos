@@ -8,9 +8,11 @@
 (enable-console-print!)
 ;; See https://github.com/ashenfad/cljx-sampling
 
-(def rng (random/create 42))
+(def rng (random/create 45))
 
 (defn rand01 [] (random/next-double! rng 1))
+
+(defn rand-n [n] (* n (random/next-double! rng)))
 
 (def ub-risks [0.0005456 0.0009988 0.0015798 0.0023618 0.0033583
                0.0044388 0.0056236 0.0068915 0.0084389 0.0102027
@@ -28,7 +30,7 @@
 
 (defn sampled "take n full precision numeric samples"
   [n] (->> centiles
-           (#(sample % :replace true :seed 0))
+           (#(sample % :replace true :seed 3))
            (map uniform-sample-on)
            (map to-survival-%)
            (take n)))
@@ -40,9 +42,9 @@
 (defn risk-category "annotate a risk value with category and icon"
   [rate] (cond
            (< rate 90) {:risk :high
-                        :icon (random-choice [:baby :incubator :toddler-bed])}
-           (<= rate 99) {:risk :normal
-                         :icon (random-choice [:baby :toddler :yboy :ygirl])}
+                        :icon (random-choice [:child-bed :incubator :toddler-cot :baby-cot])}
+           (<= rate 99) {:risk :medium
+                         :icon (random-choice [:toddler :toddler-cot :baby-cot :yboy :ygirl])}
            (> rate 99) {:risk :low
                         :icon (random-choice [:toddler :yboy :oboy :ygirl :ogirl])}))
 
@@ -54,6 +56,17 @@
                    :icon      icon
                    :risk      risk}))))
 
-;; (defn a-possible-future [n]
+(def selected-sample (decorated 100))
+
+(defn death-mask "calculate a random mask for a sample of n operations, where true means dead"
+  [] (->> selected-sample
+          (map #(>= (:rate %) (rand-n 100))))
+  )
+
+
+
+
+
+;;(defn a-possible-future [n]
 ;;  (apply str (take n (repeatedly #(if (< (rand) (sim-risk)) "   " ":) ")))))
 

@@ -23,10 +23,7 @@
      [:div {:style {:zoom    0.2}}
       (for [item row]
         [:div {:style {:display          "inline-table"
-                       :margin           "5px"
-                       :padding          "35px 60px 40px 5px"
-                       :border-radius    "30px"
-                       :background-color ((:risk item) background)
+                       :background-image (str "url(assets/" (name (:risk item)) "-risk.png)")
                        }}
          [:img {:src (str "assets/" (name (:icon item)) ".png")}]])
       ])]
