@@ -31,3 +31,10 @@ pom.xml
 # Gradle:
 .idea/gradle.xml
 .idea/libraries
+
+bower_components
+resources/docs/eganimation_narrated\ v2.pptx
+resources/docs/animation/private
+*~
+.#*
+~*
