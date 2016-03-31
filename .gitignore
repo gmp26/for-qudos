@@ -27,6 +27,7 @@ pom.xml
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 .idea/uiDesigner.xml
+.idea/replstate.xml
 
 # Gradle:
 .idea/gradle.xml
