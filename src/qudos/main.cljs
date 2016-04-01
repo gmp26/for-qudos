@@ -5,7 +5,6 @@
             [b1.charts :as c]
             [b1.svg :as svg]
             [b1.ticks :as ticks :refer [search]]
-
             [b1.layout.histogram :as h]
             [b1.maths :refer [Pi Tau radians-per-degree
                               sin cos mean]]
@@ -56,12 +55,15 @@
         scale-y (scale/linear :domain [0 max-y]
                               :range [(- height margin-vertical)
                                       margin-vertical])]
-    (prn (map #(:series %) bars))
+    ;(prn (map #(:series %) bars))
     [:svg {:width width :height height}
      [:g {:transform (svg/translate [margin-horizontal 0])}
       (svg/axis scale-y (:ticks (search [0 max-y])) :orientation :left)]
      [:g {:transform (svg/translate [0 (- height margin-vertical)])}
-      (svg/axis scale-x (:ticks (search x-axis)) :orientation :bottom)]
+      (svg/axis scale-x
+                ;(:ticks {:extent [90 100], :min 90, :max 100, :ticks [90 92 94 96 98 100]})
+                (:ticks (search x-axis))
+                :orientation :bottom)]
      [:g.chart
       (for [bar bars]
         [:g.bar {:class (str "series-" (:series bar))
@@ -72,9 +74,9 @@
                  :width (/ bar-width 2)}]])]]))
 
 (def hist
-  (-> (c/histogram data :x-axis [90 100] :bins 10)
+  (-> (c/histogram data :x-axis [0 100] :bins 10)
       (c/add-histogram more-data)
-      (as-svg :width 500 :height 300)))
+      (svg/as-svg :width 500 :height 200)))
 
 (rum/defc
   root []
