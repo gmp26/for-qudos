@@ -29,15 +29,15 @@
   [risk] (* 100 (- 1 risk)))
 
 (defn sampled "take n full precision numeric samples"
-  [n] (->> centiles
-           (#(sample % :replace true :seed 3))
-           (map uniform-sample-on)
-           (map to-survival-%)
-           (take n)))
+  [n seed] (->> centiles
+                (#(sample % :replace true :seed seed))
+                (map uniform-sample-on)
+                (map to-survival-%)
+                (take n)))
 
 (defn random-choice "choose one item randomly from a collection"
   ;;todo: make this use rng instead of sample.
-  [coll] (first (take 1 (sample coll :replace true))))
+  [coll] (nth coll (random/next-int! rng (count coll))))
 
 (defn risk-category "annotate a risk value with category and icon"
   [rate] (cond
@@ -49,19 +49,17 @@
                         :icon (random-choice [:toddler :yboy :oboy :ygirl :ogirl])}))
 
 (defn decorated "decorate n samples with string representation, icon, and risk band"
-  [n] (->> (sampled n)
-           (map #(let [{:keys [risk icon]} (risk-category %)]
+  [n seed] (map #(let [{:keys [risk icon]} (risk-category %)]
                   {:rate      %
                    :formatted (.toFixed (js/Number. %) 0)
                    :icon      icon
-                   :risk      risk}))))
+                   :risk      risk}) (sampled n seed)))
 
-(def selected-sample (decorated 100))
+(def selected-sample (decorated 100 3))
 
 (defn death-mask "calculate a random mask for a sample of n operations, where true means dead"
   [] (->> selected-sample
-          (map #(>= (:rate %) (rand-n 100))))
-  )
+          (map #(>= (:rate %) (rand-n 100)))))
 
 
 

@@ -1,2 +1,9 @@
 /* some style */
 
+g.bar.series-0 rect {
+    fill: steelblue;
+}
+
+g.bar.series-1 rect {
+    fill: lightsteelblue;
+}

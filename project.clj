@@ -18,6 +18,7 @@
                  [cljx-sampling "0.1.0"]
                  [rum "0.6.0"]
                  [figwheel-sidecar "0.5.0"]
+                 [b1 "0.3.3"]
                  ]
 
   :plugins [;;[lein-figwheel "0.5.0-6"]
