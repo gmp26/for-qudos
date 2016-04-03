@@ -15,21 +15,28 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
+(defonce sample-seed (atom 1))
+(defonce sample-rng (atom (random/create @sample-seed)))
+
 (defonce seed (atom 0))
 (defonce rng (atom (random/create @seed)))
-(defonce simulation (atom {:rng       @rng
-                           :decorated (calc/decorated @rng 100)}))
+
+(defonce simulation (atom {:decorated  (calc/decorated @sample-rng 100)}))
+
+(defn resample
+  [n]
+  (reset! sample-seed n)
+  (reset! sample-rng (random/create sample-seed))
+  (swap! simulation assoc :decorated (calc/decorated @sample-rng 100)))
 
 (defn reseed
-  ([]
-   (reset! rng (random/create @seed))
-   (swap! simulation assoc :rng @rng :decorated (calc/decorated @rng 100)))
+  [n]
+  (reset! seed n)
+  (reset! rng (random/create seed))
+  )
 
-  ([n]
-   (reset! seed n)
-   (reseed)))
-
-(reseed)
+(resample 0)
+(reseed 1)
 
 (rum/defc
   icon-block < rum/reactive []
@@ -63,8 +70,7 @@
   [event] (swap! seed inc))
 
 (defn survivors []
-  (calc/survival-count (:rng @simulation)
-                       (calc/decorated (:rng @simulation) 100)))
+  (calc/survival-count @rng (calc/decorated @sample-rng 100)))
 
 (rum/defc root < rum/reactive
           [rates]
@@ -76,10 +82,17 @@
                   (map survivors (range 200))
                   )
             [:div {:style {:margin-left "40px"}}
+             "sample: "
+             [:input {:style     {:width " 60px"
+                                  :zoom  1.8}
+                      :type      "number"
+                      :value     (rum/react sample-seed)
+                      :on-change #(resample (.parseInt js/Number. (.. % -target -value)))}]
+             ]
+            [:div {:style {:margin-left "40px"}}
              "seed: "
-             [:button.btn.btn-primary {:on-click #(swap! seed dec)}
-              "-"]
-             [:input {:style     {:width " 60px"}
+             [:input {:style     {:width " 60px"
+                                  :zoom  1.8}
                       :type      "number"
                       :value     (rum/react seed)
                       :on-change #(reseed (.parseInt js/Number. (.. % -target -value)))}]
