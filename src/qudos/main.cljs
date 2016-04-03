@@ -60,7 +60,7 @@
       (c/add-histogram (c/tallies rates1 :x-axis [90 101] :y-axis false :bins 11 :tally-h 0.5)
                        rates2)
       (c/tallies rates1 :x-axis [90 101] :y-axis false :bins 11 :tally-h 6))
-    :width 300 :height 200)
+    :width 250 :height 300)
   )
 
 (defn survivors []
@@ -73,7 +73,7 @@
            (icon-block)
            [:span {:style {:margin-left "40px"}}
             (hist (map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 60))
-                  (map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 200))
+                  ;(map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 500))
                   )
             [:div {:style {:margin-left "40px"}}
              "sample: "
