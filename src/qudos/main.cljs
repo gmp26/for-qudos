@@ -63,14 +63,8 @@
     :width 300 :height 200)
   )
 
-(defn prev-seed
-  [event] (prn "next"))
-
-(defn next-seed
-  [event] (swap! seed inc))
-
 (defn survivors []
-  (calc/survival-count @rng (calc/decorated @sample-rng 100)))
+  (calc/survival-count @rng (:decorated @simulation)))
 
 (rum/defc root < rum/reactive
           [rates]
@@ -78,8 +72,8 @@
            [:h1 "Root element"]
            (icon-block)
            [:span {:style {:margin-left "40px"}}
-            (hist (map survivors (range 60))
-                  (map survivors (range 200))
+            (hist (map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 60))
+                  (map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 200))
                   )
             [:div {:style {:margin-left "40px"}}
              "sample: "
