@@ -7,3 +7,8 @@ g.bar.series-0 rect {
 g.bar.series-1 rect {
     fill: lightsteelblue;
 }
+
+.rule {
+stroke: black;
+stroke-width: 0.5;
+}

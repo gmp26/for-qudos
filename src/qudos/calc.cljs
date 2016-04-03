@@ -8,11 +8,11 @@
 (enable-console-print!)
 ;; See https://github.com/ashenfad/cljx-sampling
 
-(def rng (random/create 45))
+;(def rng (random/create 45))
 
-(defn rand01 [] (random/next-double! rng 1))
+(defn rand01 [rng] (random/next-double! rng 1))
 
-(defn rand-n [n] (* n (random/next-double! rng)))
+(defn rand-n [rng n] (* n (random/next-double! rng)))
 
 (def ub-risks [0.0005456 0.0009988 0.0015798 0.0023618 0.0033583
                0.0044388 0.0056236 0.0068915 0.0084389 0.0102027
@@ -23,45 +23,42 @@
 ;; ((0 0.0005456) (0.0005456 0.0009988) ... )
 
 (defn uniform-sample-on "uniform sample on the interval [lb, ub]"
-  [[lb ub]] (+ lb (* (rand01) (- ub lb))))
+  [rng [lb ub]] (+ lb (* (rand01 rng) (- ub lb))))
 
 (defn to-survival-% "convert p(death) to % chance of survival "
   [risk] (* 100 (- 1 risk)))
 
-(defn sampled "take n full precision numeric samples"
-  [n seed] (->> centiles
-                (#(sample % :replace true :seed seed))
-                (map uniform-sample-on)
-                (map to-survival-%)
-                (take n)))
-
 (defn random-choice "choose one item randomly from a collection"
   ;;todo: make this use rng instead of sample.
-  [coll] (nth coll (random/next-int! rng (count coll))))
+  [rng coll]
+  (nth coll (random/next-int! rng (count coll))))
+
+(defn sampled "take n full precision numeric samples"
+  [rng n]
+  (map #(to-survival-%
+         (uniform-sample-on rng
+                            (random-choice rng centiles))) (range n)))
 
 (defn risk-category "annotate a risk value with category and icon"
-  [rate] (cond
+  [rng rate] (cond
            (< rate 90) {:risk :high
-                        :icon (random-choice [:child-bed :incubator :toddler-cot :baby-cot])}
+                        :icon (random-choice rng [:child-bed :incubator :toddler-cot :baby-cot])}
            (<= rate 99) {:risk :medium
-                         :icon (random-choice [:toddler :toddler-cot :baby-cot :yboy :ygirl])}
+                         :icon (random-choice rng [:toddler :toddler-cot :baby-cot :yboy :ygirl])}
            (> rate 99) {:risk :low
-                        :icon (random-choice [:toddler :yboy :oboy :ygirl :ogirl])}))
+                        :icon (random-choice rng [:toddler :yboy :oboy :ygirl :ogirl])}))
 
 (defn decorated "decorate n samples with string representation, icon, and risk band"
-  [n seed] (map #(let [{:keys [risk icon]} (risk-category %)]
+  [rng n] (map #(let [{:keys [risk icon]} (risk-category rng %)]
                   {:rate      %
                    :formatted (.toFixed (js/Number. %) 0)
                    :icon      icon
-                   :risk      risk}) (sampled n seed)))
+                   :risk      risk}) (sampled rng n)))
 
-(def selected-sample (decorated 100 3))
-
-(defn death-mask "calculate a random mask for a sample of n operations, where true means dead"
-  [] (->> selected-sample
-          (map #(>= (:rate %) (rand-n 100)))))
-
-
+(defn survival-count "calculate a random mask for a sample of n operations, where true means dead"
+  [rng decorated-sample]
+  (count (filter #(>= (:rate %) (rand-n rng 100)) decorated-sample))
+  )
 
 
 
