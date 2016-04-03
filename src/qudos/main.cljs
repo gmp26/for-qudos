@@ -26,13 +26,13 @@
 (defn resample
   [n]
   (reset! sample-seed n)
-  (reset! sample-rng (random/create sample-seed))
+  (reset! sample-rng (random/create @sample-seed))
   (swap! simulation assoc :decorated (calc/decorated @sample-rng 100)))
 
 (defn reseed
   [n]
   (reset! seed n)
-  (reset! rng (random/create seed))
+  (reset! rng (random/create @seed))
   )
 
 (resample 0)

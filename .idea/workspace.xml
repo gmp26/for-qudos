@@ -48,8 +48,8 @@
       <file leaf-file-name="main.cljs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/qudos/main.cljs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.0387275">
-              <caret line="65" column="0" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.34350133">
+              <caret line="34" column="30" selection-start-line="34" selection-start-column="30" selection-end-line="34" selection-end-column="30" />
               <folding />
             </state>
           </provider>
@@ -58,7 +58,7 @@
       <file leaf-file-name="calc.cljs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/qudos/calc.cljs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-15.0">
+            <state vertical-scroll-proportion="0.0">
               <caret line="27" column="38" selection-start-line="27" selection-start-column="38" selection-end-line="27" selection-end-column="38" />
               <folding />
             </state>
@@ -68,7 +68,7 @@
       <file leaf-file-name="svg.cljc" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/b1/svg.cljc">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-11.703704">
+            <state vertical-scroll-proportion="0.0">
               <caret line="218" column="21" selection-start-line="218" selection-start-column="21" selection-end-line="218" selection-end-column="21" />
               <folding />
             </state>
@@ -101,15 +101,15 @@
         <option value="$PROJECT_DIR$/src/b1/charts.cljc" />
         <option value="$PROJECT_DIR$/src/qudos/samples.cljs" />
         <option value="$PROJECT_DIR$/src/qudos/calc.cljs" />
-        <option value="$PROJECT_DIR$/src/qudos/main.cljs" />
         <option value="$PROJECT_DIR$/src/b1/svg.cljc" />
+        <option value="$PROJECT_DIR$/src/qudos/main.cljs" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="y" value="23" />
     <option name="width" value="1440" />
-    <option name="height" value="873" />
+    <option name="height" value="877" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -573,16 +573,21 @@
       <option name="project" value="LOCAL" />
       <updated>1459716773321</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="mildly weird">
+      <created>1459717754925</created>
+      <option name="number" value="00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1459717754925</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="873" extended-state="6" />
+    <frame x="0" y="23" width="1440" height="877" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32904884" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -599,6 +604,7 @@
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3984576" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -623,7 +629,8 @@
     <MESSAGE value="added icon grid" />
     <MESSAGE value="active charts but still needs work" />
     <MESSAGE value="better" />
-    <option name="LAST_COMMIT_MESSAGE" value="better" />
+    <MESSAGE value="mildly weird" />
+    <option name="LAST_COMMIT_MESSAGE" value="mildly weird" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -996,7 +1003,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/b1/svg.cljc">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.703704">
+        <state vertical-scroll-proportion="0.0">
           <caret line="218" column="21" selection-start-line="218" selection-start-column="21" selection-end-line="218" selection-end-column="21" />
           <folding />
         </state>
@@ -1004,7 +1011,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/qudos/calc.cljs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-15.0">
+        <state vertical-scroll-proportion="0.0">
           <caret line="27" column="38" selection-start-line="27" selection-start-column="38" selection-end-line="27" selection-end-column="38" />
           <folding />
         </state>
@@ -1012,8 +1019,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/qudos/main.cljs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.0387275">
-          <caret line="65" column="0" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.34350133">
+          <caret line="34" column="30" selection-start-line="34" selection-start-column="30" selection-end-line="34" selection-end-column="30" />
           <folding />
         </state>
       </provider>
