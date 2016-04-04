@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="bdeb688a-85e0-4ccc-b0bd-906126afbb5b" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/qudos/main.cljs" afterPath="$PROJECT_DIR$/src/qudos/main.cljs" />
     </list>
     <ignored path="qudos.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -585,7 +584,13 @@
       <option name="project" value="LOCAL" />
       <updated>1459718040551</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="weirdness removed">
+      <created>1459718591117</created>
+      <option name="number" value="00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1459718591117</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="ToolWindowManager">
