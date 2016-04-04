@@ -216,8 +216,8 @@
 
 
         max-freq (apply max (map #(:y %) bars))
-        tally-height (/ (- height margin-vertical) max-freq)
         bar-width (/ (- width (* 2 margin-horizontal)) (count bars))
+        tally-height (min bar-width (/ (- height margin-vertical) max-freq))
         scale-x (scale/linear :domain x-axis
                               :range [margin-horizontal
                                       (- width margin-horizontal)])

@@ -46,7 +46,7 @@
                 :source-paths ["src"]
                 :compiler {:output-to "resources/public/js/compiled/qudos.js"
                            :main qudos.main
-                           :optimizations :advanced
+                           :optimizations :whitespace
                            :pretty-print false}}]}
 
   :figwheel {;; :http-server-root "public" ;; default and assumes "resources"

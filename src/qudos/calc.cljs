@@ -55,13 +55,43 @@
                    :icon      icon
                    :risk      risk}) (sampled rng n)))
 
-(defn survival-count "calculate a random mask for a sample of n operations, where true means dead"
-  [rng decorated-sample]
-  (count (filter #(>= (:rate %) (rand-n rng 100)) decorated-sample))
-  )
+(defn simple-frequencies
+  "Simpler - and in this case, faster - algorithm for buckets of size 1"
+  [values]
+  (into (sorted-map) (frequencies (map Math/ceil values))))
 
+(defn sample-count
+  "Returns the number of observed values in a frequency map."
+  [freq-map]
+  (reduce + (vals freq-map)))
 
+(defn quantile*
+  "Like quantile but takes sample-count as an argument. For when you
+  already know the sample-count and don't want to recompute it. Also
+  assumes that the frequency map is already sorted."
+  [sorted-freq-map k q sample-count]
+  (let [rank (long (Math/ceil (* k (/ (double sample-count) q))))]
+    (loop [m (seq sorted-freq-map)
+           lower 0
+           prev-value js/Number.NEGATIVE_INFINITY
+           ]
+      (if-let [entry (first m)]
+        (let [[value freq] entry
+              upper (+ lower freq)]
+          (if (<= rank upper)
+            value
+            (recur (rest m) upper value)))
+        prev-value))))
 
-;;(defn a-possible-future [n]
-;;  (apply str (take n (repeatedly #(if (< (rand) (sim-risk)) "   " ":) ")))))
+(defn- ensure-sorted [m]
+  (if (sorted? m)
+    m
+    (into (sorted-map) m)))
 
+(defn quantile
+  "Returns the value which is greater than k/q of the observed values
+  in the frequency map. For example, k=1 q=2 is the median; k=99 q=100
+  is the 99th percentile. For bucketed frequency maps, returns the
+  nearest bucket."
+  [freq-map k q]
+  (quantile* (ensure-sorted freq-map) k q (sample-count freq-map)))
