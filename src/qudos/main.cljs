@@ -63,9 +63,9 @@
     (js/setTimeout #(resample @sample-seed) 200)
     (let [deaths (Math.round (calc/normal rng (:m sim) (:c sim)))
           to-mask (into #{} (map first (take deaths
-                                             (sort-by second >
+                                             (sort-by second <
                                                       (map-indexed
-                                                        (fn [i v] [i (+ (calc/normal rng 0 0.5) (:rate v))])
+                                                        (fn [i v] [i (+ (calc/normal rng 0 30) (:rate v))])
                                                         decorated-sample)))))
           ]
       (prn to-mask)
