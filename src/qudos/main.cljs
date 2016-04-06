@@ -23,17 +23,16 @@
 
 (defonce simulation (atom {:decorated    (calc/decorated @sample-rng 100)
                            :future-count 0
-                           :future-seed  0
-                           :m            1
-                           :c            0}))
+                           :future-seed  10
+                           :m            4.5
+                           :c            0.7}))
 
 (defn survival-count
   "find the deaths for a given future index"
   [index decorated-sample]
   (let [sim @simulation
         rng (random/create (+ index (:future-seed sim)))]
-    (- 100 (Math.round (calc/normal rng (:m sim) (:c sim))))
-    #_(count (filter #(>= (:rate %) (calc/rand-n rng 100)) decorated-sample))))
+    (- 100 (Math.round (calc/normal rng (:m sim) (:c sim))))))
 
 (defn resample
   [n]
@@ -53,8 +52,8 @@
   (reset! rng (random/create @seed)))
 
 (resample 0)
-(rescale 1 0)
-(reseed 1)
+(rescale 4.5 1)
+(reseed 0)
 
 (defn death-mask
   "show mask for deaths for a given future index"
@@ -62,12 +61,22 @@
   (let [sim @simulation
         rng (random/create (dec (+ index (:future-seed sim))))]
     (js/setTimeout #(resample @sample-seed) 200)
-    (let [deaths (Math.round (calc/normal rng (:m sim) (:c sim)))]
-      (map-indexed #(if (< %1 deaths) (assoc %2 :risk mask) %2) decorated-sample))
+    (let [deaths (Math.round (calc/normal rng (:m sim) (:c sim)))
+          to-mask (into #{} (map first (take deaths
+                                             (sort-by second >
+                                                      (map-indexed
+                                                        (fn [i v] [i (+ (calc/normal rng 0 0.5) (:rate v))])
+                                                        decorated-sample)))))
+          ]
+      (prn to-mask)
+      (map-indexed #(if (to-mask %1) (assoc %2 :risk mask) %2) decorated-sample)
+
+      ;(map-indexed #(if (< %1 deaths) (assoc %2 :risk mask) %2) decorated-sample)
+      )
     #_(map #(if (< (:rate %) (calc/rand-n rng 100)) (assoc % :risk mask) %) decorated-sample)))
 
 (rum/defc
-  icon-block < rum/reactive  []
+  icon-block < rum/reactive []
 
   [:div
    (for [row (partition 20 (:decorated (rum/react simulation)))]
@@ -87,6 +96,7 @@
     (swap! simulation assoc :decorated (death-mask (:future-count sim) (:decorated sim) mask))))
 
 (defn hist
+  "draw a tally chart"
   [rates1 & [rates2]]
   (svg/as-svg
     (if rates2
@@ -115,8 +125,8 @@
 
                [:.form-group
                 [:label.col-md-3.text-right {:for "sample"} " sample: "]
-                [:input#sample.col-md-5 {:style     {:width "90px"
-                                                     :zoom  1
+                [:input#sample.col-md-5 {:style     {:width        "90px"
+                                                     :zoom         1
                                                      :margin-right "20px"}
                                          :type      "number"
                                          :value     (rum/react sample-seed)

@@ -41,7 +41,7 @@
           s (* 4 (/ (Math.exp (- 0.5)) (Math.sqrt 2.)))
           z (* s (/ (- u1 0.5) u2))
           zz (+ (* 0.25 z z) (Math.log u2))]
-      (if (> zz 0)
+      (if (pos? zz)
         (recur)
         (+ mu (* sigma z))))))
 
@@ -49,7 +49,6 @@
   [risk] (* 100 (- 1 risk)))
 
 (defn random-choice "choose one item randomly from a collection"
-  ;;todo: make this use rng instead of sample.
   [rng coll]
   (nth coll (random/next-int! rng (count coll))))
 
