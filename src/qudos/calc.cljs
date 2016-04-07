@@ -89,15 +89,16 @@
 (defn predicted-range
   " -1 < delta < 1, and we tabulate at 0.1 intervals. Interpolate the predicted range"
   [deaths spread delta]
-  (let [ix-delta (max 0 (min 10 (/ 10 (Math.abs delta))))
+  (prn delta)
+  (let [ix-delta (max 0 (min 10 (* (Math.abs delta) 10)))
         x0 (Math.floor ix-delta)
         x1 (Math.ceil ix-delta)
         y (if (= x0 x1)
           (sn-quantiles x0)
           (lerp-v x0 (sn-quantiles x0) x1 (sn-quantiles x1) ix-delta))]
-    (prn y)
+    (prn delta x0 x1 y)
     (vec (map #(linear [spread deaths] %)
-              (if (neg? delta) (map - (reverse y)) y)))))
+              (if (neg? delta) y (map - (reverse y)))))))
 
 (defn to-survival-% "convert p(death) to % chance of survival "
   [risk] (* 100 (- 1 risk)))

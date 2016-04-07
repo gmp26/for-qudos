@@ -139,7 +139,9 @@
 (rum/defc root < rum/reactive
           [rates]
           (let [sim (rum/react simulation)
-                pr  (calc/predicted-range (- 100 (:m sim)) (:c sim) (:skew sim))]
+                pr (vec (map #(.toFixed % 1 (js/Number.)) (calc/predicted-range (- 100 (:m sim)) (:c sim) (:skew sim))))
+                ;pr (calc/predicted-range (- 100 (:m sim)) (:c sim) (:skew sim))
+                ]
             (prn "pr = "  pr)
             [:.container
              [:h2 (str "100 operations, possible outcome " (:future-count (rum/react simulation)))]
