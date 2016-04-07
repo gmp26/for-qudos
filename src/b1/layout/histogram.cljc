@@ -30,7 +30,7 @@
            (+ mn (* size step))))))
 
 (defn histogram
-  "The histogram layout transforms data by grouping descrete data points into
+  "The histogram layout transforms data by grouping discrete data points into
   bins. Returns a collection of values with the following metadata set:
 
   > *:x* the lower bound of the bin (inclusive).

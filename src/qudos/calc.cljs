@@ -45,6 +45,59 @@
         (recur)
         (+ mu (* sigma z))))))
 
+(defn- skew-normal
+  "Generate a random variable z from the skew normal distribution with shape parameter delta.
+  Return az+b. See http://azzalini.stat.unipd.it/SN/faq-r.html"
+  [rng mu sigma delta]
+  (let [u0 (normal rng 0 1)
+        v (normal rng 0 1)
+        u1 (+ (* delta u0) (* v (Math.sqrt (- 1 (* delta delta)))))
+        z (if (>= u0 0) u1 (- u1))]
+    (+ mu (* sigma z))))
+
+
+;;;
+;;
+;; Calculating skew normal quantiles - table from the R sn package.
+;;
+;;;
+;; for(i in seq(-1,1,0.1))
+;;   {print (qsn (c (0.001, 0.025, 0.975, 0.999), alpha=i / (1-i*i))) ;}
+
+(def sn-quantiles [[-3.090232 -1.959964 1.959964 3.090232]
+                   [-2.999788 -1.873362 2.033945 3.160795]
+                   [-2.883772 -1.770220 2.097484 3.214648]
+                   [-2.733242 -1.644706 2.151096 3.253169]
+                   [-2.535313 -1.488983 2.193685 3.276984]
+                   [-2.273243 -1.293831 2.223017 3.287806]
+                   [-1.929257 -1.051269 2.237714 3.290375]
+                   [-1.493351 -0.761077 2.241257 3.290526]
+                   [-0.9792991 -0.4413550 2.2414027 3.2905267]
+                   [-0.4398280 -0.1387332 2.2414027 3.2905267]
+                   [0.001253314 0.031337982 2.241402728 3.290526731]])
+
+(defn linear
+  "apply a linear transform ax+b to value x"
+  [[a b] value]
+  (+ (* a value) b))
+
+(defn lerp-v
+  "linear interpolation of vector y given x where (x,y) is on (x0,y0) (x1,y1)"
+  [x0 y0 x1 y1 x]
+  (map + y0 (map / (map * (map - y1 y0) (repeat (- x x0))) (repeat (- x1 x0)))))
+
+(defn predicted-range
+  " -1 < delta < 1, and we tabulate at 0.1 intervals. Interpolate the predicted range"
+  [deaths spread delta]
+  (let [ix-delta (max 0 (min 10 (/ 10 (Math.abs delta))))
+        x0 (Math.floor ix-delta)
+        x1 (Math.ceil ix-delta)
+        y (if (= x0 x1)
+          (sn-quantiles x0)
+          (lerp-v x0 (sn-quantiles x0) x1 (sn-quantiles x1) ix-delta))]
+    (vec (map #(linear [spread deaths] %)
+              (if (neg? delta) (map - (reverse y)) y)))))
+
 (defn to-survival-% "convert p(death) to % chance of survival "
   [risk] (* 100 (- 1 risk)))
 
@@ -67,11 +120,6 @@
                              :icon (random-choice rng [:toddler :toddler-cot :baby-cot :yboy :ygirl])}
                (> rate 99) {:risk :low
                             :icon (random-choice rng [:toddler :yboy :oboy :ygirl :ogirl])}))
-
-(defn linear
-  "apply a linear transform to a value"
-  [[m c] value]
-  (+ (* m value) c))
 
 (defn decorated "decorate n samples with string representation, icon, and risk band"
   [rng n]

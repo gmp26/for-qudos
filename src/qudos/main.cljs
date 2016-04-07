@@ -25,26 +25,31 @@
                            :future-count 0
                            :future-seed  10
                            :m            4.5
-                           :c            0.7}))
+                           :c            0.7
+                           :skew         0}))
 
 (defn survival-count
   "find the deaths for a given future index"
   [index decorated-sample]
   (let [sim @simulation
         rng (random/create (+ index (:future-seed sim)))]
-    (- 100 (Math.round (calc/normal rng (:m sim) (:c sim))))))
+    (- 100 (Math.round (calc/skew-normal rng (:m sim) (:c sim) (:skew sim))
+                       #_(if (zero? (:skew sim))
+                         (calc/normal rng (:m sim) (:c sim))
+                         (calc/skew-normal rng (:m sim) (:c sim) (:skew sim)))))))
 
 (defn resample
   [n]
   (let [sim @simulation]
     (reset! sample-seed n)
     (reset! sample-rng (random/create @sample-seed))
-    (swap! simulation assoc :decorated (calc/decorated @sample-rng 100))))
+    (swap! simulation assoc :survivors nil :decorated (calc/decorated @sample-rng 100))))
 
 (defn rescale
-  [m c]
-  (swap! simulation assoc :m m :c c)
-  )
+  ([m c skew]
+   (swap! simulation assoc :m m :c c :skew skew))
+  ([m c]
+   (rescale m c 0)))
 
 (defn reseed
   [n]
@@ -52,11 +57,11 @@
   (reset! rng (random/create @seed)))
 
 (resample 0)
-(rescale 4.5 1)
-(reseed 0)
+(rescale 4.5 0.7)
+(reseed 10)
 
 (defn death-mask
-  "show mask for deaths for a given future index"
+  "apply mask for deaths at a given future frame index"
   [index decorated-sample mask]
   (let [sim @simulation
         rng (random/create (dec (+ index (:future-seed sim))))]
@@ -66,14 +71,37 @@
                                              (sort-by second <
                                                       (map-indexed
                                                         (fn [i v] [i (+ (calc/normal rng 0 30) (:rate v))])
-                                                        decorated-sample)))))
-          ]
-      (prn to-mask)
-      (map-indexed #(if (to-mask %1) (assoc %2 :risk mask) %2) decorated-sample)
+                                                        decorated-sample)))))]
+      (swap! simulation assoc :survivors (- 100 deaths))
+      (map-indexed #(if (to-mask %1) (assoc %2 :risk mask) %2) decorated-sample))))
 
-      ;(map-indexed #(if (< %1 deaths) (assoc %2 :risk mask) %2) decorated-sample)
-      )
-    #_(map #(if (< (:rate %) (calc/rand-n rng 100)) (assoc % :risk mask) %) decorated-sample)))
+
+(defn show-deaths
+  "show/hide deaths in the icon array for the current future"
+  []
+  (let [sim @simulation]
+    (swap! simulation assoc :decorated (death-mask (:future-count sim) (:decorated sim) :dead))))
+
+(defn show-frame
+  "move model forward to the given frame and update the view"
+  [frame-number]
+  (swap! simulation assoc :future-count frame-number)
+  (show-deaths))
+
+(defn control-simulation
+  "Package all simulation control parameters into one function (for frame-by-frame views in devcards)"
+  [& {:keys [sample-seed future-seed frame deaths spread skew]
+      :or   {sample-seed 20 future-seed 30 frame 0 deaths 4 spread 0.7 skew 0}}]
+  (resample sample-seed)
+  (reseed future-seed)
+  (rescale deaths spread skew)
+  (show-frame frame))
+
+(defn predicted-ranges
+  "Take many samples and estimate predicted and extended predicted ranges"
+  [& {:keys [sample-seed future-seed frame deaths spread skew]
+      :or   {sample-seed 20 future-seed 30 frame 0 deaths 4 spread 0.7 skew 0}}]
+  )
 
 (rum/defc
   icon-block < rum/reactive []
@@ -89,12 +117,6 @@
                                       "fill-" "")
                           (name (:icon item)) ".png")}]])])])
 
-(defn show-deaths
-  "show/hide deaths in the icon array for the current future"
-  [mask]
-  (let [sim @simulation]
-    (swap! simulation assoc :decorated (death-mask (:future-count sim) (:decorated sim) mask))))
-
 (defn hist
   "draw a tally chart"
   [rates1 & [rates2]]
@@ -105,16 +127,27 @@
       (c/tallies rates1 :x-axis [90 101] :y-axis false :bins 11 :tally-h 6))
     :width 250 :height 300))
 
+(rum/defc show-survival-percent < rum/reactive []
+          (let [survivors (:survivors (rum/react simulation))]
+            [:div {:style {:font-size    "24px"
+                           :padding-left " 0px"
+                           :height       "45px"}}
+             (if (some? survivors)
+               (str "posssible outcome " (:future-count (rum/react simulation))
+                    ", " (.toFixed survivors 0 (js/Number.)) " survivors") "")]))
 
 (rum/defc root < rum/reactive
           [rates]
-          (let [sim (rum/react simulation)]
+          (let [sim (rum/react simulation)
+                pr  (calc/predicted-range (- 100 (:m sim)) (:c sim) (:skew sim))]
+            (prn "pr = "  pr)
             [:.container
-             [:h2 "100 operations"]
+             [:h2 (str "100 operations, possible outcome " (:future-count (rum/react simulation)))]
              [:.row
               [:.col-md-7
                (icon-block)
                [:div {:style {:margin-top " 20px"}}]
+               (show-survival-percent 90)
                (hist (map-indexed #(survival-count %1 (:decorated (rum/react simulation)))
                                   (range (:future-count (rum/react simulation)))))]
               ;(map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 500)))
@@ -125,49 +158,56 @@
 
                [:.form-group
                 [:label.col-md-3.text-right {:for "sample"} " sample: "]
-                [:input#sample.col-md-5 {:style     {:width        "90px"
-                                                     :zoom         1
-                                                     :margin-right "20px"}
+                [:input#sample.col-md-3 {:style     {:width "90px"
+                                                     :zoom  1
+                                                     }
                                          :type      "number"
                                          :value     (rum/react sample-seed)
-                                         :on-change #(resample (js/parseInt (.. % -target -value)))}]]
-
-               [:.form-group
-                [:label.col-md-3.text-right {:for "mu"} [:i " mu"]]
-                [:input#m.col-md-5 {:style     {:width "90px"
+                                         :on-change #(resample (js/parseInt (.. % -target -value)))}]
+                [:label.col-md-3.text-right {:for "mu"} [:i " deaths"]]
+                [:input#m.col-md-3 {:style     {:width "90px"
                                                 :zoom  1}
                                     :type      "number"
                                     :value     (:m sim)
-                                    :on-change #(rescale (js/parseFloat (.. % -target -value)) (:c sim))}]
+                                    :on-change #(rescale (js/parseFloat (.. % -target -value)) (:c sim) (:skew sim))}]]
 
-                [:label.col-md-3.text-right {:for "c"} [:i " sigma"]]
+               [:.form-group
+                [:label.col-md-3.text-right {:for "skew"} [:i " skew %"]]
+                [:input#m.col-md-5 {:style     {:width "90px"
+                                                :zoom  1}
+                                    :type      "number"
+                                    :min       -100
+                                    :max       100
+                                    :value     (Math.round (* 100 (:skew sim)))
+                                    :on-change #(rescale (:m sim) (:c sim) (/ (js/parseInt (.. % -target -value)) 100))}]
+
+                [:label.col-md-3.text-right {:for "c"} [:i " spread"]]
                 [:input#c.col-md-5 {:style     {:width "90px"
                                                 :zoom  1}
                                     :type      "number"
                                     :value     (:c sim)
-                                    :on-change #(rescale (:m sim) (js/parseFloat (.. % -target -value)))}]]
+                                    :on-change #(rescale (:m sim) (js/parseFloat (.. % -target -value)) (:skew sim))}]]
 
                [:hr]
                [:.form-group
                 [:label.col-md-7.text-right {:for "pr"} " predicted range: "]
 
                 ;; choose 0/mu=4.5/sigma=0.7/futures=60/future-seed=76 yay!
-                [:label#pr.col-md-5 94 "% - " 97 "%"]
+                [:label#pr.col-md-5 (pr 1) "% - " (pr 2) "%"]
 
                 ;; choose 0/mu=3.5/sigma=1.1/futures=60/future-seed=126
                 [:label.col-md-7.text-right {:for "epr"} " extended predicted range: "]
-                [:label#epr.col-md-5 95 "% - " 99 "%"]]
+                [:label#epr.col-md-5 (pr 0) "% - " (pr 3) "%"]]
 
                [:.form-group
-                [:label.col-md-7.text-right {:for "fcount"} " futures: "]
+                [:label.col-md-7.text-right {:for "fcount"} " possible outcome: "]
                 [:input#fcount.col-md-5 {:style     {:width "90px"
                                                      :zoom  1}
+                                         :min       0
                                          :type      "number"
                                          :value     (:future-count (rum/react simulation))
-                                         :on-change #(do
-                                                      (swap! simulation assoc
-                                                             :future-count (js/parseInt (.. % -target -value)))
-                                                      (show-deaths :dead))}]]
+                                         :on-change #(show-frame (js/parseInt (.. % -target -value)))
+                                         }]]
                [:.form-group
                 [:label.col-md-7.text-right {:for "fseed"} " future-seed: "]
                 [:input#fseed.col-md-5 {:style     {:width "90px"
