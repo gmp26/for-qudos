@@ -95,6 +95,7 @@
         y (if (= x0 x1)
           (sn-quantiles x0)
           (lerp-v x0 (sn-quantiles x0) x1 (sn-quantiles x1) ix-delta))]
+    (prn y)
     (vec (map #(linear [spread deaths] %)
               (if (neg? delta) (map - (reverse y)) y)))))
 
