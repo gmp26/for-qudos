@@ -217,7 +217,7 @@
 
         max-freq (apply max (map :y bars))
         bar-width (/ (- width (* 2 margin-horizontal)) (count bars))
-        tally-height (min bar-width (/ (- height margin-vertical) max-freq))
+        tally-height (min (/ bar-width 3) (/ (- height margin-vertical) max-freq))
         scale-x (scale/linear :domain x-axis
                               :range [margin-horizontal
                                       (- width margin-horizontal)])
@@ -235,6 +235,7 @@
             (:ticks {:extent [90 95], :min 90, :max 101,
                      :ticks  (range 90 101)})
             :orientation :bottom)]
+     [:g {:transform (translate [0 - height (/ margin-vertical 3)])}]
      [:g.chart
       (for [bar bars]
         (for [y (range (:y bar))]

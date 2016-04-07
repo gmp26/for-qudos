@@ -103,6 +103,12 @@
       :or   {sample-seed 20 future-seed 30 frame 0 deaths 4 spread 0.7 skew 0}}]
   )
 
+(defn play []
+  (prn "play")
+  (show-frame (inc (:future-count @simulation)))
+  (when (< (:future-count @simulation) 60)
+    (js/setTimeout play 350)))
+
 (rum/defc
   icon-block < rum/reactive []
 
@@ -133,7 +139,7 @@
                            :padding-left " 0px"
                            :height       "45px"}}
              (if (some? survivors)
-               (str "posssible outcome " (:future-count (rum/react simulation))
+               (str "possible outcome " (:future-count (rum/react simulation))
                     ", " (.toFixed survivors 0 (js/Number.)) " survivors") "")]))
 
 (rum/defc root < rum/reactive
@@ -144,7 +150,7 @@
                 ]
             (prn "pr = "  pr)
             [:.container
-             [:h2 (str "100 operations, possible outcome " (:future-count (rum/react simulation)))]
+             [:h2 (str "100 operations")]
              [:.row
               [:.col-md-7
                (icon-block)
@@ -202,14 +208,17 @@
                 [:label#epr.col-md-5 (pr 0) "% - " (pr 3) "%"]]
 
                [:.form-group
-                [:label.col-md-7.text-right {:for "fcount"} " possible outcome: "]
-                [:input#fcount.col-md-5 {:style     {:width "90px"
+                [:label.col-md-7.text-right {:for "fcount"} " frame: "]
+                [:input#fcount.col-md-3 {:style     {:width "90px"
                                                      :zoom  1}
                                          :min       0
                                          :type      "number"
                                          :value     (:future-count (rum/react simulation))
                                          :on-change #(show-frame (js/parseInt (.. % -target -value)))
-                                         }]]
+                                         }]
+                [:button.btn-primary {:on-click play
+                                      :type "button"} [:i.fa.fa-play]]]
+
                [:.form-group
                 [:label.col-md-7.text-right {:for "fseed"} " future-seed: "]
                 [:input#fseed.col-md-5 {:style     {:width "90px"
