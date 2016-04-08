@@ -106,7 +106,7 @@
 (defn play []
   (prn "play")
   (show-frame (inc (:future-count @simulation)))
-  (when (< (:future-count @simulation) 60)
+  (when (< (:future-count @simulation) 20)
     (js/setTimeout play 350)))
 
 (rum/defc
@@ -135,27 +135,24 @@
 
 (rum/defc show-survival-percent < rum/reactive []
           (let [survivors (:survivors (rum/react simulation))]
-            [:div {:style {:font-size    "24px"
-                           :padding-left " 0px"
+            [:div {:style {:font-size    "36px"
+                           :padding-left " 100px"
                            :height       "45px"}}
              (if (some? survivors)
-               (str "possible outcome " (:future-count (rum/react simulation))
-                    ", " (.toFixed survivors 0 (js/Number.)) " survivors") "")]))
+               (str (.toFixed survivors 0 (js/Number.)) "% survival") "")]))
 
 (rum/defc root < rum/reactive
           [rates]
           (let [sim (rum/react simulation)
-                pr (vec (map #(.toFixed % 1 (js/Number.)) (calc/predicted-range (- 100 (:m sim)) (:c sim) (:skew sim))))
-                ;pr (calc/predicted-range (- 100 (:m sim)) (:c sim) (:skew sim))
-                ]
-            (prn "pr = "  pr)
+                pr (vec (map #(.toFixed % 1 (js/Number.))
+                             (calc/predicted-range (- 100 (:m sim)) (:c sim) (:skew sim))))]
             [:.container
              [:h2 (str "100 operations")]
              [:.row
               [:.col-md-7
                (icon-block)
                [:div {:style {:margin-top " 20px"}}]
-               (show-survival-percent 90)
+               (show-survival-percent)
                (hist (map-indexed #(survival-count %1 (:decorated (rum/react simulation)))
                                   (range (:future-count (rum/react simulation)))))]
               ;(map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 500)))

@@ -1,7 +1,8 @@
 /* some style */
 
 g.bar.series-0 rect {
-    fill: steelblue;
+    //fill: steelblue;
+    fill: #dc3912
 }
 
 g.bar.series-1 rect {
