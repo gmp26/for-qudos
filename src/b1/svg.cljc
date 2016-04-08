@@ -205,8 +205,8 @@
            [:rect {:height (->> bar :y scale-y (- height margin-vertical))
                    :width  (dec bar-width)}]])]]))
 
-(defmethod as-svg :tallies [{:keys [histograms bins x-axis y-axis tally-h]
-                             :or   {x-axis true y-axis true tally-h 10}} & {:keys [width height]}]
+(defmethod as-svg :tallies [{:keys [histograms bins x-axis y-axis tally-h predicted-range]
+                             :or   {x-axis true y-axis true tally-h 10 predicted-range nil}} & {:keys [width height]}]
   (let [margin-vertical (if x-axis 40 0)
         margin-horizontal (if y-axis 40 0)
         bars (->> histograms
@@ -235,7 +235,10 @@
             (:ticks {:extent [90 95], :min 90, :max 101,
                      :ticks  (range 90 101)})
             :orientation :bottom)]
-     [:g {:transform (translate [0 - height (/ margin-vertical 3)])}]
+     (when predicted-range
+       ;; todo
+       [:g {:transform (translate [0 (- height (/ margin-vertical 3))])}
+        [:rect {:x 0 :y 0 :width 20 :height 20 :fill "#566AF9"}]])
      [:g.chart
       (for [bar bars]
         (for [y (range (:y bar))]
