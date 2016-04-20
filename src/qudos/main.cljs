@@ -64,15 +64,19 @@
   "apply mask for deaths at a given future frame index"
   [index decorated-sample mask]
   (let [sim @simulation
-        rng (random/create (dec (+ index (:future-seed sim))))]
-    (js/setTimeout #(resample @sample-seed) 200)
-    (let [deaths (Math.round (calc/normal rng (:m sim) (:c sim)))
+        rng (random/create (+ index (:future-seed sim)))
+        ;rng (random/create (dec (+ index (:future-seed sim))))
+        ]
+    (js/setTimeout #(resample @sample-seed) 400)
+    (let [deaths (- 100 (survival-count index decorated-sample))
+          ;;(Math.round (calc/normal rng (:m sim) (:c sim)))
           to-mask (into #{} (map first (take deaths
                                              (sort-by second <
                                                       (map-indexed
                                                         (fn [i v] [i (+ (calc/normal rng 0 30) (:rate v))])
                                                         decorated-sample)))))]
       (swap! simulation assoc :survivors (- 100 deaths))
+      (prn (str "simulation = " (:survivors @simulation)))
       (map-indexed #(if (to-mask %1) (assoc %2 :risk mask) %2) decorated-sample))))
 
 
@@ -107,7 +111,7 @@
   (prn "play")
   (show-frame (inc (:future-count @simulation)))
   (when (< (:future-count @simulation) 20)
-    (js/setTimeout play 350)))
+    (js/setTimeout play 500)))
 
 (rum/defc
   icon-block < rum/reactive []
@@ -153,9 +157,12 @@
                (icon-block)
                [:div {:style {:margin-top " 20px"}}]
                (show-survival-percent)
-               (hist (map-indexed #(survival-count %1 (:decorated (rum/react simulation)))
+
+               ;; out by one error fixed by inc in next statement.
+
+               (hist (map-indexed #(survival-count (inc %1) (:decorated (rum/react simulation)))
                                   (range (:future-count (rum/react simulation)))))]
-              ;(map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 500)))
+              ;;(map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 500)))
 
               [:form.form-horizontal.col-md-5 {:style {:border "1px solid #CCCCCC"}}
                [:.form-group
