@@ -122,7 +122,7 @@
 
   [:div
    (for [row (partition 10 (:decorated (rum/react simulation)))]
-     [:div {:style {:zoom 0.25}}
+     [:div {:style {:zoom 0.1}}
       (for [item row]
         [:div {:style {:display           "inline-table"
                        :padding           "0px"
@@ -131,7 +131,7 @@
                        :background-size "400px"
                        }}
 
-         [:img {:src (str "assets/" (if (= (:risk item) :dead) "dead-risk" (name (:icon item))) ".png")}]])])])
+         [:img {:style {:width "400px" :height "400px"} :src (str "assets/" (if (= (:risk item) :dead) "dead-risk" (name (:icon item))) ".png")}]])])])
 
 (defn hist
   "draw a tally chart"
@@ -141,12 +141,12 @@
       (c/add-histogram (c/tallies rates1 :x-axis [90 101] :y-axis false :bins 11 :tally-h 0.5)
                        rates2)
       (c/tallies rates1 :x-axis [90 101] :y-axis false :bins 11 :tally-h 6))
-    :width 250 :height 300))
+    :width 300 :height 360))
 
 (rum/defc show-survival-percent < rum/reactive []
           (let [survivors (:survivors (rum/react simulation))]
             [:div {:style {:font-size    "36px"
-                           :padding-left " 100px"
+                           :padding-left "0px"
                            :height       "45px"}}
              (if (some? survivors)
                (str (.toFixed survivors 0 (js/Number.)) "% survival") "")]))
@@ -159,18 +159,21 @@
             [:.container
              [:h2 (str "100 operations")]
              [:.row
-              [:.col-sm-12
+              [:.col-md-7
                (icon-block)
                [:div {:style {:margin-top " 20px"}}]
-               (show-survival-percent)
+               ]
 
-               ;; out by one error fixed by inc in next statement.
+              ;; out by one error fixed by inc in next statement.
 
-               (hist (map-indexed #(survival-count (inc %1) (:decorated (rum/react simulation)))
-                                  (range (:future-count (rum/react simulation)))))]
               ;;(map #(calc/survival-count @rng (:decorated (rum/react simulation))) (range 500)))
 
-              [:form.form-horizontal.col-md-5 {:style {:border "1px solid #CCCCCC"}}
+              [:.col-md-5 {:style {:margin-top "0px" :padding-left "23px"}}
+               (show-survival-percent)
+               (hist (map-indexed #(survival-count (inc %1) (:decorated (rum/react simulation)))
+                                  (range (:future-count (rum/react simulation)))))]]
+             [:.row
+              [:form.form-horizontal.col-md-6 {:style {:border "1px solid #CCCCCC"}}
                [:.form-group
                 [:h3.col-md-12 "Controls"]]
 
@@ -227,7 +230,7 @@
                                          :on-change #(show-frame (js/parseInt (.. % -target -value)))
                                          }]
                 [:button.btn-primary {:on-click play
-                                      :type "button"} [:i.fa.fa-play]]]
+                                      :type     "button"} [:i.fa.fa-play]]]
 
                [:.form-group
                 [:label.col-md-7.text-right {:for "fseed"} " future-seed: "]
