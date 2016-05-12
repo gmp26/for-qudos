@@ -60,6 +60,8 @@
 (rescale 4.5 0.7)
 (reseed 10)
 
+(def show-death-time 0)                                     ; positive millisecs or forever
+
 (defn death-mask
   "apply mask for deaths at a given future frame index"
   [index decorated-sample mask]
@@ -67,7 +69,8 @@
         rng (random/create (+ index (:future-seed sim)))
         ;rng (random/create (dec (+ index (:future-seed sim))))
         ]
-    (js/setTimeout #(resample @sample-seed) 400)
+    (if (pos? show-death-time)
+      (js/setTimeout #(resample @sample-seed) show-death-time))
     (let [deaths (- 100 (survival-count index decorated-sample))
           ;;(Math.round (calc/normal rng (:m sim) (:c sim)))
           to-mask (into #{} (map first (take deaths
@@ -77,6 +80,7 @@
                                                         decorated-sample)))))]
       (swap! simulation assoc :survivors (- 100 deaths))
       (prn (str "simulation = " (:survivors @simulation)))
+
       (map-indexed #(if (to-mask %1) (assoc %2 :risk mask) %2) decorated-sample))))
 
 
@@ -117,15 +121,17 @@
   icon-block < rum/reactive []
 
   [:div
-   (for [row (partition 20 (:decorated (rum/react simulation)))]
-     [:div {:style {:zoom 0.1}}
+   (for [row (partition 10 (:decorated (rum/react simulation)))]
+     [:div {:style {:zoom 0.25}}
       (for [item row]
-        [:div {:style {:display          "inline-table"
-                       :background-image (str "url(assets/" (name (:risk item)) "-risk.png)")
+        [:div {:style {:display           "inline-table"
+                       :padding           "0px"
+                       :background-repeat "no-repeat"
+                       :background-image  (str "url(assets/" (name (:risk item)) "-risk.png)")
+                       :background-size "400px"
                        }}
-         [:img {:src (str "assets/" (if (= (:risk item) :dead)
-                                      "fill-" "")
-                          (name (:icon item)) ".png")}]])])])
+
+         [:img {:src (str "assets/" (if (= (:risk item) :dead) "dead-risk" (name (:icon item))) ".png")}]])])])
 
 (defn hist
   "draw a tally chart"
@@ -153,7 +159,7 @@
             [:.container
              [:h2 (str "100 operations")]
              [:.row
-              [:.col-md-7
+              [:.col-sm-12
                (icon-block)
                [:div {:style {:margin-top " 20px"}}]
                (show-survival-percent)

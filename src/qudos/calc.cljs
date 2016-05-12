@@ -117,11 +117,11 @@
 (defn risk-category "annotate a risk value with category and icon"
   [rng rate] (cond
                (< rate 90) {:risk :high
-                            :icon (random-choice rng [:child-bed :incubator :toddler-cot :baby-cot])}
+                            :icon (random-choice rng [:inc :inc :inc :inc :inc :inc :cot :cot :cot :cot :cot :cot :bed :bed :bed :bed :bed :bed :yboy1 :ygirl1])}
                (<= rate 99) {:risk :medium
-                             :icon (random-choice rng [:toddler :toddler-cot :baby-cot :yboy :ygirl])}
+                             :icon (random-choice rng [:inc :bed :bed :cot :cot :cot :yboy1 :ygirl1 :yboy2 :ygirl2 :yboy1 :ygirl1])}
                (> rate 99) {:risk :low
-                            :icon (random-choice rng [:toddler :yboy :oboy :ygirl :ogirl])}))
+                            :icon (random-choice rng [:inc :cot :bed :yboy1 :yboy2 :ygirl1 :ygirl2 :ogirl1 :ogirl2 :oboy1 :oboy2 ])}))
 
 (defn decorated "decorate n samples with string representation, icon, and risk band"
   [rng n]
