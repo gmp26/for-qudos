@@ -30,7 +30,7 @@
 
 (defn survival-count
   "find the deaths for a given future index"
-  [index decorated-sample]
+  [index]
   (let [sim @simulation
         rng (random/create (+ index (:future-seed sim)))]
     (- 100 (Math.round (calc/skew-normal rng (:m sim) (:c sim) (:skew sim))
@@ -71,7 +71,8 @@
         ]
     (if (pos? show-death-time)
       (js/setTimeout #(resample @sample-seed) show-death-time))
-    (let [deaths (- 100 (survival-count index decorated-sample))
+
+    (let [deaths (- 100 (survival-count index))
           ;;(Math.round (calc/normal rng (:m sim) (:c sim)))
           to-mask (into #{} (map first (take deaths
                                              (sort-by second <
@@ -80,6 +81,8 @@
                                                         decorated-sample)))))]
       (swap! simulation assoc :survivors (- 100 deaths))
       (prn (str "simulation = " (:survivors @simulation)))
+      (prn (str "to-mask = " to-mask))
+
 
       (map-indexed #(if (to-mask %1) (assoc %2 :risk mask) %2) decorated-sample))))
 
@@ -170,7 +173,7 @@
 
               [:.col-md-5 {:style {:margin-top "0px" :padding-left "23px"}}
                (show-survival-percent)
-               (hist (map-indexed #(survival-count (inc %1) (:decorated (rum/react simulation)))
+               (hist (map-indexed #(survival-count (inc %1))
                                   (range (:future-count (rum/react simulation)))))]]
              [:.row
               [:form.form-horizontal.col-md-6 {:style {:border "1px solid #CCCCCC"}}
