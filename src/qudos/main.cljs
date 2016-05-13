@@ -26,7 +26,9 @@
                            :future-seed  10
                            :m            4.5
                            :c            0.7
-                           :skew         0}))
+                           :skew         0
+                           :deaths-visible true
+                           :backgrounds-visible true}))
 
 (defn survival-count
   "find the deaths for a given future index"
@@ -80,11 +82,12 @@
                                                         (fn [i v] [i (+ (calc/normal rng 0 30) (:rate v))])
                                                         decorated-sample)))))]
       (swap! simulation assoc :survivors (- 100 deaths))
-      (prn (str "simulation = " (:survivors @simulation)))
-      (prn (str "to-mask = " to-mask))
+      ;(prn (str "simulation = " (:survivors @simulation)))
+      ;(prn (str "to-mask = " to-mask))
 
 
-      (map-indexed #(if (to-mask %1) (assoc %2 :risk mask) %2) decorated-sample))))
+      (map-indexed #(if (to-mask %1)
+                     (assoc %2 :dead mask) %2) decorated-sample))))
 
 
 (defn show-deaths
@@ -97,6 +100,7 @@
   "move model forward to the given frame and update the view"
   [frame-number]
   (swap! simulation assoc :future-count frame-number)
+  (resample 13)
   (show-deaths))
 
 (defn control-simulation
@@ -111,30 +115,36 @@
 (defn predicted-ranges
   "Take many samples and estimate predicted and extended predicted ranges"
   [& {:keys [sample-seed future-seed frame deaths spread skew]
-      :or   {sample-seed 20 future-seed 30 frame 0 deaths 4 spread 0.7 skew 0}}]
-  )
+      :or   {sample-seed 20 future-seed 30 frame 0 deaths 4 spread 0.7 skew 0}}])
 
 (defn play []
-  (prn "play")
+  ;(prn "play")
   (show-frame (inc (:future-count @simulation)))
   (when (< (:future-count @simulation) 20)
     (js/setTimeout play 500)))
 
 (rum/defc
   icon-block < rum/reactive []
+  (let [sim (rum/react simulation)]
+    [:div
+     (for [row (partition 10 (:decorated sim))]
+       [:div {:style {:zoom 0.1}}
+        (for [item row]
+          [:div {:style {:display           "inline-table"
+                         :padding           "0px"
+                         :background-repeat "no-repeat"
+                         :background-image  (if (:backgrounds-visible sim)
+                                              (str "url(assets/" (name (:risk item)) "-risk.png)")
+                                              "none")
+                         :background-size   "400px"
+                         }}
 
-  [:div
-   (for [row (partition 10 (:decorated (rum/react simulation)))]
-     [:div {:style {:zoom 0.1}}
-      (for [item row]
-        [:div {:style {:display           "inline-table"
-                       :padding           "0px"
-                       :background-repeat "no-repeat"
-                       :background-image  (str "url(assets/" (name (:risk item)) "-risk.png)")
-                       :background-size "400px"
-                       }}
-
-         [:img {:style {:width "400px" :height "400px"} :src (str "assets/" (if (= (:risk item) :dead) "dead-risk" (name (:icon item))) ".png")}]])])])
+           [:img {:style {:width "400px" :height "400px"}
+                  :src   (str "assets/"
+                              (if (and (= (:dead item) :dead) (:deaths-visible sim))
+                                "dead-risk"
+                                (name (:icon item)))
+                              ".png")}]])])]))
 
 (defn hist
   "draw a tally chart"
@@ -160,7 +170,12 @@
                 pr (vec (map #(.toFixed % 1 (js/Number.))
                              (calc/predicted-range (- 100 (:m sim)) (:c sim) (:skew sim))))]
             [:.container
-             [:h2 (str "100 operations")]
+             [:.row
+              [:h2 (str "100 operations")]
+              ;[:p (str "show deaths: " (:deaths-visible sim))]
+              ;[:p (str @simulation)]
+              ]
+
              [:.row
               [:.col-md-7
                (icon-block)
@@ -242,7 +257,31 @@
                                         :type      "number"
                                         :value     (:future-seed (rum/react simulation))
                                         :on-change #(swap! simulation assoc
-                                                           :future-seed (js/parseInt (.. % -target -value)))}]]]]]))
+                                                           :future-seed (js/parseInt (.. % -target -value)))}]]
+
+               [:.form-group
+
+                [:.checkbox
+                 [:label
+                  [:input#show-deaths.col-md-8 {:type      "checkbox"
+                                                :checked   (:deaths-visible (rum/react simulation))
+                                                :on-change #(do
+                                                             (.log js/console %)
+                                                             (show-deaths)
+                                                             (swap! simulation assoc
+                                                                    :deaths-visible (.. % -target -checked)))}]
+                  "show deaths"]]
+                [:.checkbox
+                 [:label
+                  (prn "backgrounds-visible: " (:backgrounds-visible (rum/react simulation)))
+                  [:input#show-deaths.col-md-8 {:type      "checkbox"
+                                                :checked   (:backgrounds-visible (rum/react simulation))
+                                                :on-change #(do
+                                                             (.log js/console %)
+                                                             (swap! simulation assoc
+                                                                    :backgrounds-visible (.. % -target -checked)))}]
+                  "show risk backgrounds"]]
+                ]]]]))
 
 (defn el [id] (js/document.getElementById id))
 

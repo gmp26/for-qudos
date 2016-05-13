@@ -89,14 +89,14 @@
 (defn predicted-range
   " -1 < delta < 1, and we tabulate at 0.1 intervals. Interpolate the predicted range"
   [deaths spread delta]
-  (prn delta)
+  ;(prn delta)
   (let [ix-delta (max 0 (min 10 (* (Math.abs delta) 10)))
         x0 (Math.floor ix-delta)
         x1 (Math.ceil ix-delta)
         y (if (= x0 x1)
-          (sn-quantiles x0)
-          (lerp-v x0 (sn-quantiles x0) x1 (sn-quantiles x1) ix-delta))]
-    (prn delta x0 x1 y)
+            (sn-quantiles x0)
+            (lerp-v x0 (sn-quantiles x0) x1 (sn-quantiles x1) ix-delta))]
+    ;(prn delta x0 x1 y)
     (vec (map #(linear [spread deaths] %)
               (if (neg? delta) y (map - (reverse y)))))))
 
@@ -121,7 +121,7 @@
                (<= rate 99) {:risk :medium
                              :icon (random-choice rng [:inc :bed :bed :cot :cot :cot :yboy1 :ygirl1 :yboy2 :ygirl2 :yboy1 :ygirl1])}
                (> rate 99) {:risk :low
-                            :icon (random-choice rng [:inc :cot :bed :yboy1 :yboy2 :ygirl1 :ygirl2 :ogirl1 :ogirl2 :oboy1 :oboy2 ])}))
+                            :icon (random-choice rng [:inc :cot :bed :yboy1 :yboy2 :ygirl1 :ygirl2 :ogirl1 :ogirl2 :oboy1 :oboy2])}))
 
 (defn decorated "decorate n samples with string representation, icon, and risk band"
   [rng n]
@@ -129,6 +129,7 @@
          {:rate      %
           :formatted (.toFixed (js/Number. %) 0)
           :icon      icon
+          :dead      false
           :risk      risk}) (sampled rng n)))
 
 (defn simple-frequencies
