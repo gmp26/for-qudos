@@ -3,6 +3,7 @@
 figwheel_server.log
 pom.xml
 *jar
+*aep
 /lib/
 /classes/
 /out/

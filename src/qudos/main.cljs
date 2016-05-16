@@ -100,7 +100,7 @@
   "move model forward to the given frame and update the view"
   [frame-number]
   (swap! simulation assoc :future-count frame-number)
-  (resample 13)
+  (resample @sample-seed)
   (show-deaths))
 
 (defn control-simulation
@@ -112,7 +112,7 @@
   (rescale deaths spread skew)
   (show-frame frame))
 
-(defn predicted-ranges
+#_(defn predicted-ranges
   "Take many samples and estimate predicted and extended predicted ranges"
   [& {:keys [sample-seed future-seed frame deaths spread skew]
       :or   {sample-seed 20 future-seed 30 frame 0 deaths 4 spread 0.7 skew 0}}])
@@ -232,11 +232,11 @@
                 [:label.col-md-7.text-right {:for "pr"} " predicted range: "]
 
                 ;; choose 0/mu=4.5/sigma=0.7/futures=60/future-seed=76 yay!
-                [:label#pr.col-md-5 (pr 1) "% - " (pr 2) "%"]
+                [:label#pr.col-md-5 (min 100 (pr 1)) "% - " (min 100 (pr 2)) "%"]
 
                 ;; choose 0/mu=3.5/sigma=1.1/futures=60/future-seed=126
                 [:label.col-md-7.text-right {:for "epr"} " extended predicted range: "]
-                [:label#epr.col-md-5 (pr 0) "% - " (pr 3) "%"]]
+                [:label#epr.col-md-5 (min 100 (pr 0)) "% - " (min 100 (pr 3)) "%"]]
 
                [:.form-group
                 [:label.col-md-7.text-right {:for "fcount"} " frame: "]
